@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Product Details - VORTEX TOP UP SHOP</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="auth.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .product-details-container {
+            max-width: 1000px;
+            margin: 40px auto;
+            background: #1e1e1e;
+            padding: 30px;
+            border-radius: 15px;
+            display: flex;
+            gap: 40px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            border: 1px solid #333;
+        }
+
+        .product-image {
+            flex: 1;
+            text-align: center;
+            background: radial-gradient(circle, #2c3e50 0%, #000 100%);
+            padding: 20px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .product-image img {
+            max-width: 100%;
+            max-height: 400px;
+            object-fit: contain;
+            filter: drop-shadow(0 0 15px rgba(255, 255, 255, 0.2));
+        }
+
+        .product-info {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .product-title {
+            font-size: 2rem;
+            color: #fff;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            font-weight: 900;
+        }
+
+        .product-price {
+            font-size: 2.5rem;
+            color: #e74c3c;
+            font-weight: 900;
+            margin-bottom: 20px;
+        }
+
+        .product-description {
+            color: #bdc3c7;
+            line-height: 1.6;
+            margin-bottom: 30px;
+        }
+
+        .features-list {
+            margin-bottom: 30px;
+            list-style: none;
+        }
+
+        .features-list li {
+            margin-bottom: 10px;
+            color: #ecf0f1;
+        }
+
+        .features-list i {
+            color: #27ae60;
+            margin-right: 10px;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 15px;
+        }
+
+        .btn-buy {
+            flex: 2;
+            padding: 15px;
+            background: linear-gradient(45deg, #c0392b, #e74c3c);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 1.2rem;
+            font-weight: 900;
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .btn-buy:hover {
+            transform: scale(1.05);
+        }
+
+        .btn-wa {
+            flex: 1;
+            padding: 15px;
+            background: #25D366;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 1.2rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        @media (max-width: 768px) {
+            .product-details-container {
+                flex-direction: column;
+                margin: 20px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <script>
+        // AUTH PROTECT
+        const currentUser = JSON.parse(localStorage.getItem('currentUser'));
+        if (!currentUser) {
+            window.location.href = 'login.html';
+        }
+    </script>
+
+    <header>
+        <h2><a href="index.html" style="text-decoration: none; color: white;">VORTEX TOP UP SHOP</a></h2>
+        <div class="search-box" style="margin-left: 20px;">
+            <input type="text" placeholder="Search" disabled style="opacity: 0.5;">
+        </div>
+    </header>
+
+    <nav class="tab-nav">
+        <a href="index.html" class="tab-link active">Diamonds</a>
+        <a href="account.html" class="tab-link">History</a>
+    </nav>
+
+    <div class="product-details-container">
+        <div class="product-image">
+            <img id="p-img" src="diamond_3d.png" alt="Product Image">
+        </div>
+        <div class="product-info">
+            <h1 id="p-title" class="product-title">Loading...</h1>
+            <div id="p-price" class="product-price">₹ --</div>
+
+            <div class="quantity-selector"
+                style="display: flex; align-items: center; margin-bottom: 20px; background: #2c3e50; padding: 10px; border-radius: 10px; width: fit-content;">
+                <button onclick="changeQty(-1)"
+                    style="background:none; border:none; color:white; font-size:1.5rem; cursor:pointer; padding: 0 15px;">-</button>
+                <span id="qty-display" style="font-size: 1.5rem; font-weight: bold; color: white;">1</span>
+                <button onclick="changeQty(1)"
+                    style="background:none; border:none; color:white; font-size:1.5rem; cursor:pointer; padding: 0 15px;">+</button>
+            </div>
+
+            <p class="product-description">
+                Get instant delivery of your items directly to your account.
+                100% Safe and Secure transaction. No login required for ID based topups.
+            </p>
+
+            <ul class="features-list">
+                <li><i class="fas fa-check-circle"></i> Instant Delivery</li>
+                <li><i class="fas fa-check-circle"></i> 24/7 Support</li>
+                <li><i class="fas fa-check-circle"></i> Secure Payment</li>
+            </ul>
+
+            <div class="action-buttons">
+                <button class="btn-wa"
+                    onclick="window.location.href='https://chat.whatsapp.com/HeVn41FGbZkLU1L0hfmorV'">
+                    <i class="fab fa-whatsapp"></i>
+                </button>
+                <button class="btn-buy" onclick="goToCheckout()">Buy Now</button>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <h3>VORTEX TOP UP SHOP</h3>
+        <div class="footer-links">
+            <a href="#">About Us</a>
+            <a href="https://chat.whatsapp.com/HeVn41FGbZkLU1L0hfmorV">Contact Support</a>
+            <a href="#">Privacy Policy</a>
+            <a href="#">Terms of Service</a>
+        </div>
+        <div class="copyright">
+            &copy; 2024 VORTEX TOP UP SHOP. All Rights Reserved. <br>
+            Designed for Gamers 🎮
+        </div>
+    </footer>
+
+    <script>
+        // Parse URL Params
+        const urlParams = new URLSearchParams(window.location.search);
+        const product = urlParams.get('product') || 'Unknown Product';
+        const basePrice = parseInt(urlParams.get('price')) || 0;
+        let pQty = 1;
+
+        // Update page content
+        document.getElementById('p-title').innerText = product;
+        updatePriceDisplay();
+
+        function changeQty(change) {
+            if (pQty + change > 0) {
+                pQty += change;
+                updatePriceDisplay();
+            }
+        }
+
+        function updatePriceDisplay() {
+            document.getElementById('qty-display').innerText = pQty;
+            document.getElementById('p-price').innerText = "₹ " + (basePrice * pQty);
+        }
+
+        // Dynamic Image Logic (Simple check for memberships)
+        const img = document.getElementById('p-img');
+        if (product.toLowerCase().includes('weekly') || product.toLowerCase().includes('monthly')) {
+            img.src = 'mnthly.png';
+            if (product.toLowerCase().includes('membership')) {
+                img.src = 'membership_monthly_new.png';
+            }
+        } else {
+            img.src = 'diamond_3d.png';
+        }
+
+        function goToCheckout() {
+            window.location.href = `checkout.html?product=${encodeURIComponent(product)}&price=${basePrice}&qty=${pQty}`;
+        }
+    </script>
+</body>
+
+</html>

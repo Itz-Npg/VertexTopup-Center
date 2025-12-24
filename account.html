@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Account - VORTEX TOP UP SHOP</title>
+    <!-- Reusing existing styles + some custom account styles -->
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="auth.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+</head>
+
+<body>
+
+    <script>
+        // AUTH PROTECT: Check if user is logged in
+        const currentUser = JSON.parse(localStorage.getItem('currentUser'));
+        if (!currentUser) {
+            window.location.href = 'login.html';
+        }
+    </script>
+
+    <header>
+        <h2><a href="index.html" style="text-decoration: none; color: white;">VORTEX TOP UP SHOP</a></h2>
+
+    </header>
+
+    <nav class="tab-nav">
+        <a href="index.html" class="tab-link">Diamonds</a>
+        <a href="account.html" class="tab-link active">History</a>
+    </nav>
+
+    <div class="account-container" style="padding: 20px; max-width: 600px; margin: 0 auto;">
+        <div class="account-header" style="margin-top: 0;">
+            <div class="user-info">
+                <h2 id="userName" style="display: inline-block;">Welcome!</h2>
+                <i class="fas fa-edit" onclick="editProfile()"
+                    style="cursor: pointer; color: #7f8c8d; margin-left: 10px; font-size: 1rem;" title="Edit Name"></i>
+                <p id="userMobile">User</p>
+            </div>
+            <button class="logout-btn" onclick="logout()">Logout</button>
+        </div>
+    </div>
+
+    <div class="section-title">Order History</div>
+
+    <div class="orders-container" id="ordersList">
+        <!-- Orders will be rendered here -->
+    </div>
+
+    <script>
+        // Display User Info
+        if (currentUser) {
+            document.getElementById('userName').innerText = currentUser.name || "Gamer";
+            document.getElementById('userMobile').innerText = currentUser.mobile || "";
+        }
+
+        const ordersList = document.getElementById('ordersList');
+
+        // API Base URL - works locally and on Vercel
+        const API_BASE = window.location.hostname === 'localhost' || window.location.protocol === 'file:'
+            ? 'http://localhost:3000'
+            : '';
+
+        // Load Orders from Backend
+        async function loadHistory() {
+            ordersList.innerHTML = '<div class="loading-state"><i class="fas fa-spinner fa-spin"></i> Loading orders...</div>';
+
+            // Check if user is logged in
+            if (!currentUser || !currentUser.mobile) {
+                ordersList.innerHTML = `
+                    <div class="empty-state">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <h3>Not Logged In</h3>
+                        <p>Please login to view your order history.</p>
+                        <a href="login.html" class="btn-home">Login Now</a>
+                    </div>
+                `;
+                return;
+            }
+
+            try {
+                const res = await fetch(`${API_BASE}/api/orders/${currentUser.mobile}`);
+
+                if (!res.ok) {
+                    // Server might not be running - show empty state instead of error
+                    ordersList.innerHTML = `
+                        <div class="empty-state">
+                            <i class="fas fa-history"></i>
+                            <h3>No orders yet</h3>
+                            <p>Your recent top-ups will appear here.</p>
+                            <a href="index.html" class="btn-home">Shop Now</a>
+                        </div>
+                    `;
+                    return;
+                }
+
+                const orders = await res.json();
+
+                ordersList.innerHTML = ''; // Clear loading
+
+                if (orders.length === 0) {
+                    ordersList.innerHTML = `
+                        <div class="empty-state">
+                            <i class="fas fa-history"></i>
+                            <h3>No orders yet</h3>
+                            <p>Your recent top-ups will appear here.</p>
+                            <a href="index.html" class="btn-home">Shop Now</a>
+                        </div>
+                    `;
+                    return;
+                }
+
+                // Sort orders by date (newest first)
+                orders.sort((a, b) => new Date(b.orderDate) - new Date(a.orderDate));
+
+                orders.forEach(order => {
+                    const date = new Date(order.orderDate).toLocaleDateString();
+                    const statusClass = `status-${order.status.toLowerCase()}`;
+
+                    const card = `
+                        <div class="order-card ${statusClass}">
+                            <div class="order-header">
+                                <span>#${order._id.slice(-6).toUpperCase()}</span>
+                                <span>${date}</span>
+                            </div>
+                            <div class="order-body">
+                                <div>
+                                    <div class="order-product">${order.item} (x${order.quantity})</div>
+                                    <div class="order-price">₹ ${order.price}</div>
+                                </div>
+                                <div class="order-status ${statusClass}">
+                                    ${order.status}
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                    ordersList.innerHTML += card;
+                });
+
+            } catch (err) {
+                ordersList.innerHTML = `
+                    <div class="error-state">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <h3>Failed to load order history.</h3>
+                        <p>Please try again later. Ensure Server is Running.</p>
+                    </div>
+                `;
+                console.error("Error loading order history:", err);
+            }
+        }
+
+        loadHistory();
+
+        function logout() {
+            localStorage.removeItem('currentUser');
+            window.location.href = 'login.html';
+        }
+
+        async function editProfile() {
+            const newName = prompt("Enter your new display name:", currentUser.name || "");
+            if (newName && newName.trim() !== "") {
+                // Update on Server
+                try {
+                    await fetch(`${API_BASE}/api/update-profile`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ mobile: currentUser.mobile, newName: newName.trim() })
+                    });
+
+                    // Update Local
+                    currentUser.name = newName.trim();
+                    localStorage.setItem('currentUser', JSON.stringify(currentUser));
+                    document.getElementById('userName').innerText = currentUser.name;
+                } catch (err) {
+                    alert("Failed to update profile on server.");
+                }
+            }
+        }
+    </script>
+
+    <footer>
+        <h3>VORTEX TOP UP SHOP</h3>
+        <div class="footer-links">
+            <a href="#">About Us</a>
+            <a href="https://chat.whatsapp.com/HeVn41FGbZkLU1L0hfmorV">Contact Support</a>
+            <a href="#">Privacy Policy</a>
+            <a href="#">Terms of Service</a>
+        </div>
+        <div class="copyright">
+            &copy; 2024 VORTEX TOP UP SHOP. All Rights Reserved. <br>
+            Designed for Gamers 🎮
+        </div>
+    </footer>
+
+</body>
+
+</html>

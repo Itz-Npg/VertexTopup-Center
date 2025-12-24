@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Checkout - VORTEX TOP UP SHOP</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="checkout.css">
+    <!-- FontAwesome for icons (optional, using unicode or simple text for now if not available) -->
+</head>
+
+<body>
+
+    <header>
+        <h2><a href="index.html" style="text-decoration: none; color: white;">VORTEX TOP UP SHOP</a></h2>
+
+    </header>
+
+    <nav class="tab-nav">
+        <a href="index.html" class="tab-link">Diamonds</a>
+        <a href="account.html" class="tab-link">History</a>
+    </nav>
+
+    <div class="breadcrumb">
+        <strong>Wait 1-15 Minute</strong> > Review Order
+    </div>
+
+    <div class="container">
+        <!-- Left Column -->
+        <div class="left-column">
+
+
+
+            <div class="card">
+                <div style="display: flex; justify-content: space-between;">
+                    <h3>Contact Details</h3>
+                    <a href="login.html" style="font-size: 12px; color: #2ecc71; text-decoration: none;">Already an
+                        existing
+                        user? Sign In</a>
+                </div>
+
+                <form>
+                    <div class="form-group">
+                        <input type="text" class="form-control" placeholder="Name *" required id="clientName">
+                        <input type="text" class="form-control" placeholder="Mobile Number *" required
+                            id="clientMobile">
+                    </div>
+
+                    <div class="form-group">
+                        <input type="text" class="form-control" placeholder="Game UID (8+ digits) *" required
+                            id="clientUID" pattern="[0-9]{8,}" title="UID must be at least 8 digits"
+                            oninput="this.value = this.value.replace(/[^0-9]/g, '')">
+                        <input type="text" class="form-control" placeholder="Axis Token *" required id="clientToken">
+                    </div>
+
+                    <div class="guest-check">
+                        <input type="checkbox" id="guest" checked>
+                        <label for="guest">Continue as Guest</label>
+                    </div>
+                </form>
+            </div>
+
+            <!-- How to Get Axis Token Video -->
+            <div class="card">
+                <h3>📺 How to Get Axis Token</h3>
+                <div class="video-container"
+                    style="position: relative; padding-bottom: 56.25%; height: 0; overflow: hidden; border-radius: 10px;">
+                    <iframe id="tutorial-video" src="https://www.youtube.com/embed/9rT0A8h9bB0"
+                        style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none;"
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                        allowfullscreen>
+                    </iframe>
+                </div>
+                <p style="margin-top: 15px; font-size: 13px; color: #95a5a6;">Watch this video to learn how to find your
+                    Axis Token in the game settings.</p>
+            </div>
+
+
+
+        </div>
+
+        <!-- Right Column -->
+        <div class="right-column">
+
+
+
+            <div class="card">
+                <h3>Item (<span id="item-count-header">1</span>)</h3>
+                <div class="item-row">
+                    <img src="./garena-free-fire-max-logo (1).avif" alt="Product" class="item-img">
+                    <div class="item-details">
+                        <div class="item-header">
+                            <span id="item-name">200 💎 50% TOP UP EVENT COMPLETE</span>
+                            <strong id="item-price">₹ 141</strong>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <span class="remove-btn">Remove</span>
+                            <div class="quantity-control">
+                                <span style="cursor: pointer; padding: 0 5px;" onclick="decreaseQty()">-</span>
+                                <span id="qty-value">1</span>
+                                <span style="cursor: pointer; padding: 0 5px;" onclick="increaseQty()">+</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <h3>Bill Details</h3>
+                <div class="bill-row">
+                    <span>Sub Total</span>
+                    <strong id="bill-subtotal">₹ 141</strong>
+                </div>
+                <div class="bill-row">
+                    <span>Tax</span>
+                    <strong>₹ 0</strong>
+                </div>
+                <div class="bill-row total">
+                    <span>Payable</span>
+                    <strong id="bill-total">₹ 141</strong>
+                </div>
+            </div>
+
+
+
+            <div style="margin-bottom: 20px;">
+                <p class="payment-text">Payment Method Whatsapp QR code.</p>
+                <p class="payment-text">भुगतान विधि व्हाट्सएप QR कोड।</p>
+                <p class="payment-text">পেমেন্ট পদ্ধতি হোয়াটসঅ্যাপ QR কোড।</p>
+            </div>
+
+            <button class="continue-btn" onclick="confirmOrder()">Confirm & Order</button>
+        </div>
+    </div>
+
+    <!-- Order Success Message (Hidden by default) -->
+    <div id="success-message" style="display: none; text-align: center; margin-top: 50px;">
+        <h2 style="color: #27ae60; font-size: 2em;">✅ Order Placed Successfully!</h2>
+        <p style="font-size: 1.2em; margin-top: 20px;">Your order has been received.</p>
+        <p>We will contact you shortly.</p>
+        <button class="continue-btn" onclick="window.location.href='index.html'" style="margin-top: 30px;">Return to
+            Shop</button>
+    </div>
+
+    </div>
+    </div>
+
+    <script>
+        // extract params
+        const urlParams = new URLSearchParams(window.location.search);
+        const product = urlParams.get('product') || "No Product Selected";
+
+        // Parse price as float to handle numeric operations
+        let unitPrice = parseFloat(urlParams.get('price')) || 0;
+        let quantity = parseInt(urlParams.get('qty')) || 1;
+        let totalPrice = unitPrice;
+
+        // Initial UI Update
+        document.getElementById('item-name').innerText = product;
+
+        // API Base URL - works locally and on Vercel
+        const API_BASE = window.location.hostname === 'localhost' || window.location.protocol === 'file:'
+            ? 'http://localhost:3000'
+            : '';
+
+        // Load Settings (Video URL from Admin)
+        fetch(`${API_BASE}/api/settings`)
+            .then(res => res.json())
+            .then(settings => {
+                if (settings.youtubeVideoUrl) {
+                    document.getElementById('tutorial-video').src = settings.youtubeVideoUrl;
+                }
+            })
+            .catch(err => console.log('Could not load settings'));
+
+        function updatePriceDisplay() {
+            totalPrice = unitPrice * quantity;
+
+            // Update Quantity elements
+            document.getElementById('item-count-header').innerText = quantity;
+            document.getElementById('qty-value').innerText = quantity;
+
+            // Update Price elements
+            document.getElementById('item-price').innerText = "₹ " + totalPrice;
+            document.getElementById('bill-subtotal').innerText = "₹ " + totalPrice;
+            document.getElementById('bill-total').innerText = "₹ " + totalPrice;
+        }
+
+        // Call immediately to set initial state
+        updatePriceDisplay();
+
+        function increaseQty() {
+            quantity++;
+            updatePriceDisplay();
+        }
+
+        function decreaseQty() {
+            if (quantity > 1) {
+                quantity--;
+                updatePriceDisplay();
+            }
+        }
+
+        function confirmOrder() {
+            const name = document.getElementById('clientName').value;
+            const mobile = document.getElementById('clientMobile').value;
+            const gameUID = document.getElementById('clientUID').value;
+            const axisToken = document.getElementById('clientToken').value;
+            const btn = document.querySelector('.continue-btn');
+
+            // Validation
+            if (!name || !mobile) {
+                alert("Please fill in Name and Mobile Number");
+                return;
+            }
+
+            if (!gameUID || gameUID.length < 8) {
+                alert("Game UID must be at least 8 digits");
+                return;
+            }
+
+            if (!axisToken) {
+                alert("Please enter your Axis Token");
+                return;
+            }
+
+            // Show loading state
+            const originalText = btn.innerText;
+            btn.innerText = "Processing...";
+            btn.disabled = true;
+            btn.style.opacity = "0.7";
+            btn.style.cursor = "not-allowed";
+
+            // Send Order to Backend
+            fetch(`${API_BASE}/api/checkout`, {
+                method: "POST",
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    customerName: name,
+                    customerMobile: mobile,
+                    gameUID: gameUID,
+                    axisToken: axisToken,
+                    item: product,
+                    price: totalPrice,
+                    quantity: quantity
+                })
+            })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.success) {
+                        // Show Success Message
+                        document.querySelector('.container').style.display = 'none';
+                        document.getElementById('success-message').style.display = 'block';
+                        document.querySelector('header').style.display = 'none';
+                        const breadcrumb = document.querySelector('.breadcrumb');
+                        if (breadcrumb) breadcrumb.style.display = 'none';
+                    } else {
+                        alert('Order Failed');
+                    }
+                })
+                .catch(error => {
+                    console.log(error);
+                    alert('Server Error. Ensure Node.js is running.');
+                    // Reset button if error
+                    btn.innerText = originalText;
+                    btn.disabled = false;
+                    btn.style.opacity = "1";
+                    btn.style.cursor = "pointer";
+                });
+        }
+    </script>
+
+    <footer>
+        <h3>VORTEX TOP UP SHOP</h3>
+        <div class="footer-links">
+            <a href="#">About Us</a>
+            <a href="https://chat.whatsapp.com/HeVn41FGbZkLU1L0hfmorV">Contact Support</a>
+            <a href="#">Privacy Policy</a>
+            <a href="#">Terms of Service</a>
+        </div>
+        <div class="copyright">
+            &copy; 2024 VORTEX TOP UP SHOP. All Rights Reserved. <br>
+            Designed for Gamers 🎮
+        </div>
+    </footer>
+
+</body>
+
+</html>

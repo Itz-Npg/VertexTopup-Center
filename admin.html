@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - VORTEX</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body {
+            padding: 20px;
+            background: #121212;
+            color: #ecf0f1;
+        }
+
+        .admin-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            border-bottom: 2px solid #c0392b;
+            padding-bottom: 10px;
+        }
+
+        .admin-header h2 {
+            color: #e74c3c;
+            text-transform: uppercase;
+        }
+
+        .order-table {
+            width: 100%;
+            border-collapse: collapse;
+            background: #1e1e1e;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        .order-table th,
+        .order-table td {
+            padding: 15px;
+            text-align: left;
+            border-bottom: 1px solid #333;
+        }
+
+        .order-table th {
+            background: #c0392b;
+            color: white;
+            font-weight: bold;
+        }
+
+        .order-table tr:hover {
+            background: #2c3e50;
+        }
+
+        .status-badge {
+            padding: 5px 10px;
+            border-radius: 15px;
+            font-size: 0.8rem;
+            font-weight: bold;
+        }
+
+        .status-Processing {
+            background: #f39c12;
+            color: #000;
+        }
+
+        .status-Completed {
+            background: #27ae60;
+            color: white;
+        }
+
+        .action-btn {
+            background: #3498db;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .action-btn:hover {
+            background: #2980b9;
+        }
+    </style>
+</head>
+
+<body>
+
+    <script>
+        // Simple Auth Check
+        // In a real app, this would be server-side.
+        const password = prompt("Enter Admin Password:");
+        if (password !== "admin123") {
+            alert("Access Denied");
+            window.location.href = "index.html";
+        }
+    </script>
+
+    <header>
+        <h2><a href="index.html" style="text-decoration: none; color: white;">VORTEX TOP UP SHOP</a></h2>
+        <div class="search-box" style="margin-left: 20px; visibility: hidden;">
+            <input type="text" placeholder="Search" disabled style="opacity: 0.5;">
+        </div>
+
+        <nav class="nav-links">
+            <a href="index.html" class="nav-link">Diamonds</a>
+            <a href="account.html" class="nav-link">History</a>
+        </nav>
+    </header>
+
+    <h3 style="margin-bottom: 15px;">All Orders</h3>
+
+    <div style="overflow-x: auto;">
+        <table class="order-table">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Date</th>
+                    <th>Customer</th>
+                    <th>Mobile</th>
+                    <th>Product</th>
+                    <th>Price</th>
+                    <th>Status</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody id="adminOrderList">
+                <!-- Orders will be loaded here -->
+            </tbody>
+        </table>
+    </div>
+
+    <div id="noOrders" style="display: none; text-align: center; margin-top: 50px; color: #7f8c8d;">
+        <h3>No orders found</h3>
+    </div>
+
+    <script>
+        const allOrders = JSON.parse(localStorage.getItem('allOrders')) || [];
+
+        // API Base URL - works locally and on Vercel
+        const API_BASE = window.location.hostname === 'localhost' || window.location.protocol === 'file:'
+            ? 'http://localhost:3000'
+            : '';
+
+        // Load All Orders from Backend
+        async function loadAdminData() {
+            const tableBody = document.getElementById('adminOrderList');
+            tableBody.innerHTML = '<tr><td colspan="8">Loading...</td></tr>';
+
+            try {
+                const res = await fetch(`${API_BASE}/api/all-orders`);
+                const orders = await res.json();
+
+                tableBody.innerHTML = '';
+
+                if (orders.length === 0) {
+                    document.getElementById('noOrders').style.display = 'block';
+                    document.querySelector('.order-table').style.display = 'none';
+                    return;
+                }
+
+                // Sort by newest first (assuming _id can be used for rough sorting or add a timestamp)
+                orders.sort((a, b) => new Date(b.orderDate) - new Date(a.orderDate));
+
+                orders.forEach(order => {
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `
+                        <td>#${order._id.slice(-6).toUpperCase()}</td>
+                        <td>${new Date(order.orderDate).toLocaleDateString()}</td>
+                        <td>${order.customerName || 'Guest'}</td>
+                        <td>${order.customerMobile || '-'}</td>
+                        <td>${order.item}</td>
+                        <td style="color: #e74c3c; font-weight: bold;">₹ ${order.price}</td>
+                        <td><span class="status-badge status-${order.status}">${order.status}</span></td>
+                        <td>
+                            <button class="action-btn" onclick="deleteOrder('${order._id}')"><i class="fas fa-trash"></i></button>
+                        </td>
+                    `;
+                    tableBody.appendChild(tr);
+                });
+            } catch (err) {
+                console.error("Failed to fetch orders:", err);
+                tableBody.innerHTML = '<tr><td colspan="8">Failed to connect to Server or load orders.</td></tr>';
+                document.getElementById('noOrders').style.display = 'block';
+                document.getElementById('noOrders').innerHTML = '<h3>Failed to load orders. Please try again later.</h3>';
+                document.querySelector('.order-table').style.display = 'none';
+            }
+        }
+
+        loadAdminData();
+
+        async function deleteOrder(id) {
+            if (confirm('Are you sure you want to delete this order?')) {
+                try {
+                    const res = await fetch(`${API_BASE}/api/orders/${id}`, { method: 'DELETE' });
+                    const data = await res.json();
+                    if (data.success) {
+                        location.reload();
+                    } else {
+                        alert('Failed to delete order');
+                    }
+                } catch (err) {
+                    alert('Server Error');
+                }
+            }
+        }
+    </script>
+
+    <footer>
+        <h3>VORTEX TOP UP SHOP</h3>
+        <div class="footer-links">
+            <a href="#">About Us</a>
+            <a href="https://chat.whatsapp.com/HeVn41FGbZkLU1L0hfmorV">Contact Support</a>
+            <a href="#">Privacy Policy</a>
+            <a href="#">Terms of Service</a>
+        </div>
+        <div class="copyright">
+            &copy; 2024 VORTEX TOP UP SHOP. All Rights Reserved. <br>
+            Designed for Gamers 🎮
+        </div>
+    </footer>
+
+</body>
+
+</html>

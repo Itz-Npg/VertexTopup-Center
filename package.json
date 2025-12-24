@@ -1,0 +1,12 @@
+{
+  "name": "vortex-topup-shop",
+  "version": "1.0.0",
+  "description": "VORTEX Top Up Shop - Free Fire Diamond Store",
+  "scripts": {
+    "dev": "vercel dev",
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "mongodb": "^6.3.0"
+  }
+}

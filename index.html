@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>VORTEX TOP UP SHOP</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+    <script>
+        // AUTH PROTECT: Check if user is logged in
+        const currentUser = JSON.parse(localStorage.getItem('currentUser'));
+        if (!currentUser) {
+            window.location.href = 'login.html';
+        }
+    </script>
+    <div id="home-view">
+
+        <header>
+            <h2><a href="index.html" style="text-decoration: none; color: white;">VORTEX TOP UP SHOP</a></h2>
+            <div style="display: flex; align-items: center; gap: 15px;">
+                <a href="https://chat.whatsapp.com/HeVn41FGbZkLU1L0hfmorV" target="_blank" rel="noopener noreferrer"
+                    onclick="window.open('https://chat.whatsapp.com/HeVn41FGbZkLU1L0hfmorV', '_blank'); return false;"
+                    style="background: #25D366; padding: 10px 15px; border-radius: 25px; display: flex; align-items: center; gap: 8px; text-decoration: none; color: white; font-weight: bold; cursor: pointer; z-index: 100;">
+                    <i class="fab fa-whatsapp" style="font-size: 20px;"></i>
+                    <span style="font-size: 14px;">Join Group</span>
+                </a>
+                <div class="search-box">
+                    <input type="text" id="searchInput" onkeyup="searchProducts()" placeholder="Search for a product">
+                </div>
+            </div>
+        </header>
+
+        <nav class="tab-nav">
+            <a href="index.html" class="tab-link active">Diamonds</a>
+            <a href="account.html" class="tab-link">History</a>
+        </nav>
+
+        <div class="container">
+
+            <!-- PRODUCTS - Loaded from Database -->
+            <div class="products">
+                <h2>💎 Diamond Top-Up Packages</h2>
+
+                <script>
+                    function searchProducts() {
+                        var input, filter, cards, h4, i, txtValue;
+                        input = document.getElementById("searchInput");
+                        filter = input.value.toUpperCase();
+                        cards = document.getElementsByClassName("card");
+
+                        for (i = 0; i < cards.length; i++) {
+                            h4 = cards[i].querySelector(".card-content h4");
+                            if (h4) {
+                                txtValue = h4.textContent || h4.innerText;
+                                if (txtValue.toUpperCase().indexOf(filter) > -1) {
+                                    cards[i].style.display = "";
+                                } else {
+                                    cards[i].style.display = "none";
+                                }
+                            }
+                        }
+                    }
+                </script>
+
+                <div class="grid" id="mainProductsGrid">
+                    <p style="color: #888; text-align: center; grid-column: 1/-1;">
+                        <i class="fas fa-spinner fa-spin"></i> Loading products...
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <script>
+            // API Base URL - works locally and on Vercel
+            const API_BASE = window.location.hostname === 'localhost' || window.location.protocol === 'file:'
+                ? 'http://localhost:3000'
+                : '';
+
+            // Load ALL Products from Database API
+            async function loadAllProducts() {
+                const grid = document.getElementById('mainProductsGrid');
+
+                try {
+                    const res = await fetch(`${API_BASE}/api/products`);
+                    const products = await res.json();
+
+                    if (products.length === 0) {
+                        grid.innerHTML = '<p style="color: #888; text-align: center; grid-column: 1/-1;">No products available.</p>';
+                        return;
+                    }
+
+                    grid.innerHTML = products.map(p => `
+                        <div class="card" style="${!p.inStock ? 'opacity: 0.5; pointer-events: none;' : ''}">
+                            <span class="discount" style="${!p.inStock ? 'background: #c0392b;' : ''}">${!p.inStock ? '❌ OUT OF STOCK' : '🔥 Available'}</span>
+                            <img src="${p.image || 'diamond_3d.png'}" alt="${p.name}">
+                            <div class="card-content">
+                                <h4>${p.name}</h4>
+                                <span class="price">₹${p.price}</span>
+                                <button class="btn" onclick="window.location.href='https://chat.whatsapp.com/HeVn41FGbZkLU1L0hfmorV'">
+                                    WhatsApp QR Code
+                                </button>
+                                <button class="btn" ${!p.inStock ? 'disabled style="background: #555; cursor: not-allowed;"' : ''}
+                                    onclick="window.location.href='product-details.html?product=${encodeURIComponent(p.name)}&price=${p.price}'">
+                                    ${p.inStock ? 'Buy Now' : 'Out of Stock'}
+                                </button>
+                            </div>
+                        </div>
+                    `).join('');
+
+                } catch (err) {
+                    console.error('Failed to load products:', err);
+                    grid.innerHTML = '<p style="color: #e74c3c; text-align: center; grid-column: 1/-1;">⚠️ Could not load products. Make sure server is running!</p>';
+                }
+            }
+
+            // Load products on page load
+            loadAllProducts();
+        </script>
+    </div>
+
+
+
+
+    <footer>
+        <h3>VORTEX TOP UP SHOP</h3>
+        <div class="footer-links">
+            <a href="#">About Us</a>
+            <a href="https://chat.whatsapp.com/HeVn41FGbZkLU1L0hfmorV">Contact Support</a>
+            <a href="#">Privacy Policy</a>
+            <a href="admin-panel.html">🔐 Admin Panel</a>
+        </div>
+        <div class="copyright">
+            &copy; 2024 VORTEX TOP UP SHOP. All Rights Reserved. <br>
+            Designed for Gamers 🎮
+        </div>
+    </footer>
+
+</body>
+
+</html>
